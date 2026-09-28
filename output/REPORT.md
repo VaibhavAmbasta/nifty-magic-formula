@@ -12,18 +12,18 @@ Generated 2026-09-28 · universe: NSE Nifty 500 (https://archives.nseindia.com/c
 
 Parameters: minimum market cap Rs 5,000 cr · statements no older than 550 days · financials and utilities excluded · holding companies excluded where book minority interest > 20% of market cap.
 
-## Funnel: how 501 companies became 340
+## Funnel: how 501 companies became 350
 
 | Step | Companies removed | Remaining |
 |---|---:|---:|
 | Starting universe | – | 501 |
 | financial / utility (excluded by method) | 123 | 378 |
-| missing market cap | 11 | 367 |
-| market cap below Rs 5,000 cr | 1 | 366 |
-| missing balance-sheet items for ROC | 1 | 365 |
-| EBIT <= 0 (loss-making at operating level) | 20 | 345 |
-| holding company: minority interest > 20% of market cap (EV unreliable) | 5 | 340 |
-| **Ranked** | | **340** |
+| market cap below Rs 5,000 cr | 1 | 377 |
+| missing market cap | 1 | 376 |
+| missing balance-sheet items for ROC | 1 | 375 |
+| EBIT <= 0 (loss-making at operating level) | 20 | 355 |
+| holding company: minority interest > 20% of market cap (EV unreliable) | 5 | 350 |
+| **Ranked** | | **350** |
 
 Full list of exclusions with reasons: `output/03_exclusions.csv`.
 
@@ -31,58 +31,60 @@ Full list of exclusions with reasons: `output/03_exclusions.csv`.
 
 | # | Company | Symbol | Sector | Mkt cap (cr) | EBIT (cr) | ROC | ROC rank | EY | EY rank | Score |
 |---:|---|---|---|---:|---:|---:|---:|---:|---:|---:|
-| 1 | HCL Technologies Ltd. | HCLTECH | Information Technology | 337,788 | 40,819 | 221.6% | 14 | 13.1% | 13 | 27 |
-| 2 | Sonata Software Ltd. | SONATSOFTW | Information Technology | 7,624 | 690 | 336.9% | 4 | 8.9% | 29 | 33 |
-| 3 | Zensar Technolgies Ltd. | ZENSARTECH | Information Technology | 9,977 | 839 | 160.4% | 25 | 11.2% | 17 | 42 |
-| 4 | Birlasoft Ltd. | BSOFT | Information Technology | 7,679 | 803 | 97.0% | 43 | 14.9% | 6 | 49 |
-| 5 | BLS International Services Ltd. | BLS | Consumer Services | 9,160 | 756 | 165.1% | 22 | 9.0% | 28 | 50 |
-| 6 | KPIT Technologies Ltd. | KPITTECH | Information Technology | 13,908 | 1,045 | 166.7% | 21 | 7.9% | 35 | 56 |
-| 7 | Castrol India Ltd. | CASTROLIND | Oil Gas & Consumable Fuels | 19,980 | 1,249 | 308.6% | 7 | 6.6% | 50 | 57 |
-| 8 | Wipro Ltd. | WIPRO | Information Technology | 160,885 | 14,913 | 90.8% | 46 | 11.7% | 15 | 61 |
-| 9 | Sun TV Network Ltd. | SUNTV | Media Entertainment & Publication | 20,524 | 1,498 | 94.0% | 44 | 10.7% | 19 | 63 |
-| 10 | Infosys Ltd. | INFY | Information Technology | 405,439 | 38,582 | 101.4% | 42 | 10.2% | 22 | 64 |
-| 11 | Pfizer Ltd. | PFIZER | Healthcare | 18,148 | 847 | 304.2% | 8 | 5.6% | 72 | 80 |
-| 12 | Hexaware Technologies Ltd. | HEXT | Information Technology | 29,874 | 1,841 | 129.2% | 30 | 6.5% | 54 | 84 |
-| 13 | ITC Ltd. | ITC | Fast Moving Consumer Goods | 333,688 | 25,596 | 79.1% | 53 | 8.2% | 32 | 85 |
-| 14 | Hero MotoCorp Ltd. | HEROMOTOCO | Automobile and Auto Components | 107,086 | 6,204 | 104.8% | 39 | 6.5% | 53 | 92 |
-| 15 | Hindustan Zinc Ltd. | HINDZINC | Metals & Mining | 242,660 | 18,495 | 76.8% | 55 | 7.8% | 38 | 93 |
-| 16 | National Aluminium Co. Ltd. | NATIONALUM | Metals & Mining | 63,832 | 7,212 | 50.8% | 81 | 13.0% | 14 | 95 |
-| 17 | RITES Ltd. | RITES | Construction | 9,462 | 499 | 74.6% | 60 | 7.5% | 41 | 101 |
-| 18 | MphasiS Ltd. | MPHASIS | Information Technology | 42,617 | 2,428 | 117.5% | 35 | 5.8% | 67 | 102 |
-| 19 | Chennai Petroleum Corporation Ltd. | CHENNPETRO | Oil Gas & Consumable Fuels | 21,147 | 4,460 | 35.8% | 116 | 20.3% | 2 | 118 |
-| 20 | Newgen Software Technologies Ltd. | NEWGEN | Information Technology | 6,790 | 378 | 63.5% | 71 | 6.6% | 48 | 119 |
+| 1 | HCL Technologies Ltd. | HCLTECH | Information Technology | 337,626 | 40,819 | 221.6% | 14 | 13.1% | 14 | 28 |
+| 2 | Sonata Software Ltd. | SONATSOFTW | Information Technology | 7,617 | 690 | 336.9% | 4 | 8.9% | 31 | 35 |
+| 3 | Zensar Technolgies Ltd. | ZENSARTECH | Information Technology | 9,926 | 839 | 160.4% | 25 | 11.3% | 18 | 43 |
+| 4 | Birlasoft Ltd. | BSOFT | Information Technology | 7,675 | 803 | 97.0% | 45 | 14.9% | 7 | 52 |
+| 5 | BLS International Services Ltd. | BLS | Consumer Services | 9,167 | 756 | 165.1% | 22 | 9.0% | 30 | 52 |
+| 6 | KPIT Technologies Ltd. | KPITTECH | Information Technology | 13,877 | 1,045 | 166.7% | 21 | 7.9% | 38 | 59 |
+| 7 | Castrol India Ltd. | CASTROLIND | Oil Gas & Consumable Fuels | 19,971 | 1,249 | 308.6% | 7 | 6.6% | 53 | 60 |
+| 8 | Wipro Ltd. | WIPRO | Information Technology | 160,866 | 14,913 | 90.8% | 48 | 11.7% | 16 | 64 |
+| 9 | Sun TV Network Ltd. | SUNTV | Media Entertainment & Publication | 20,546 | 1,498 | 94.0% | 46 | 10.7% | 20 | 66 |
+| 10 | Infosys Ltd. | INFY | Information Technology | 405,196 | 38,582 | 101.4% | 44 | 10.2% | 23 | 67 |
+| 11 | Tata Consultancy Services Ltd. | TCS | Information Technology | 750,970 | 67,022 | 111.1% | 39 | 9.3% | 29 | 68 |
+| 12 | Pfizer Ltd. | PFIZER | Healthcare | 18,160 | 847 | 304.2% | 8 | 5.6% | 76 | 84 |
+| 13 | ITC Ltd. | ITC | Fast Moving Consumer Goods | 333,625 | 25,596 | 79.1% | 55 | 8.2% | 33 | 88 |
+| 14 | Hexaware Technologies Ltd. | HEXT | Information Technology | 29,855 | 1,841 | 129.2% | 31 | 6.5% | 57 | 88 |
+| 15 | Hindustan Zinc Ltd. | HINDZINC | Metals & Mining | 241,984 | 18,495 | 76.8% | 57 | 7.8% | 40 | 97 |
+| 16 | Hero MotoCorp Ltd. | HEROMOTOCO | Automobile and Auto Components | 107,276 | 6,204 | 104.8% | 41 | 6.5% | 56 | 97 |
+| 17 | National Aluminium Co. Ltd. | NATIONALUM | Metals & Mining | 63,805 | 7,212 | 50.8% | 84 | 13.0% | 15 | 99 |
+| 18 | RITES Ltd. | RITES | Construction | 9,475 | 499 | 74.6% | 62 | 7.5% | 44 | 106 |
+| 19 | MphasiS Ltd. | MPHASIS | Information Technology | 42,554 | 2,428 | 117.5% | 36 | 5.8% | 71 | 107 |
+| 20 | Ashok Leyland Ltd. | ASHOKLEY | Capital Goods | 91,744 | 11,001 | 55.4% | 78 | 7.7% | 42 | 120 |
 
 ## Findings
 
-- **Top 20 vs ranked universe (medians):** ROC 103.1% vs 24.1%; EY 8.5% vs 3.3%.
-- **ROC and EY ranks are positively correlated (Spearman +0.16).** Positive means high-quality businesses are not systematically priced higher here, which makes it easier to find names good on both.
+- **Top 20 vs ranked universe (medians):** ROC 107.9% vs 24.1%; EY 8.6% vs 3.4%.
+- **ROC and EY ranks are positively correlated (Spearman +0.17).** Positive means high-quality businesses are not systematically priced higher here, which makes it easier to find names good on both.
 - **Sector concentration of the top 20:**
 - Information Technology: 10
-- Oil Gas & Consumable Fuels: 2
 - Metals & Mining: 2
 - Consumer Services: 1
+- Oil Gas & Consumable Fuels: 1
 - Media Entertainment & Publication: 1
 - Healthcare: 1
 - Fast Moving Consumer Goods: 1
 - Automobile and Auto Components: 1
 - Construction: 1
+- Capital Goods: 1
 - **High ROC but too expensive to make the top 20:**
-- Oracle Financial Services Software Ltd. (OFSS): ROC 328.6% (rank 5), EY 3.9% (rank 138) → overall #37
-- Abbott India Ltd. (ABBOTINDIA): ROC 421.0% (rank 2), EY 3.3% (rank 172) → overall #58
-- Inventurus Knowledge Solutions Ltd. (IKS): ROC 327.5% (rank 6), EY 3.0% (rank 190) → overall #69
-- Glaxosmithkline Pharmaceuticals Ltd. (GLAXO): ROC 407.1% (rank 3), EY 2.7% (rank 224) → overall #82
-- Affle 3i Ltd. (AFFLE): ROC 289.4% (rank 10), EY 2.5% (rank 241) → overall #99
-- TBO Tek Ltd. (TBOTEK): ROC 303.4% (rank 9), EY 2.0% (rank 269) → overall #118
-- Indiamart Intermesh Ltd. (INDIAMART): ROC 2,343.5% (rank 1), EY 0.5% (rank 335) → overall #166
+- Oracle Financial Services Software Ltd. (OFSS): ROC 328.6% (rank 5), EY 3.9% (rank 143) → overall #39
+- Abbott India Ltd. (ABBOTINDIA): ROC 421.0% (rank 2), EY 3.3% (rank 178) → overall #60
+- Inventurus Knowledge Solutions Ltd. (IKS): ROC 327.5% (rank 6), EY 3.0% (rank 196) → overall #71
+- Glaxosmithkline Pharmaceuticals Ltd. (GLAXO): ROC 407.1% (rank 3), EY 2.7% (rank 230) → overall #83
+- Affle 3i Ltd. (AFFLE): ROC 289.4% (rank 10), EY 2.5% (rank 248) → overall #100
+- TBO Tek Ltd. (TBOTEK): ROC 303.4% (rank 9), EY 2.0% (rank 277) → overall #122
+- Indiamart Intermesh Ltd. (INDIAMART): ROC 2,343.5% (rank 1), EY 0.5% (rank 344) → overall #170
 - **Cheap but low quality, so they miss the top 20:**
-- Bharat Petroleum Corporation Ltd. (BPCL): ROC 34.2% (rank 124), EY 22.8% (rank 1) → overall #22
-- NMDC Ltd. (NMDC): ROC 33.4% (rank 126), EY 13.6% (rank 9) → overall #31
-- Coal India Ltd. (COALINDIA): ROC 28.1% (rank 149), EY 14.5% (rank 7) → overall #45
-- Hindustan Petroleum Corporation Ltd. (HINDPETRO): ROC 23.0% (rank 179), EY 19.6% (rank 3) → overall #59
-- Chambal Fertilizers & Chemicals Ltd. (CHAMBLFERT): ROC 21.8% (rank 187), EY 14.2% (rank 8) → overall #67
-- NCC Ltd. (NCC): ROC 20.6% (rank 197), EY 16.6% (rank 5) → overall #70
-- Mangalore Refinery & Petrochemicals Ltd. (MRPL): ROC 20.2% (rank 202), EY 13.4% (rank 10) → overall #75
-- Oil & Natural Gas Corporation Ltd. (ONGC): ROC 18.2% (rank 225), EY 17.5% (rank 4) → overall #85
+- Chennai Petroleum Corporation Ltd. (CHENNPETRO): ROC 35.8% (rank 119), EY 20.4% (rank 3) → overall #21
+- Bharat Petroleum Corporation Ltd. (BPCL): ROC 34.2% (rank 127), EY 22.9% (rank 1) → overall #23
+- NMDC Ltd. (NMDC): ROC 33.4% (rank 129), EY 13.6% (rank 10) → overall #31
+- Coal India Ltd. (COALINDIA): ROC 28.1% (rank 153), EY 14.5% (rank 8) → overall #47
+- Indian Oil Corporation Ltd. (IOC): ROC 23.4% (rank 179), EY 21.6% (rank 2) → overall #61
+- Hindustan Petroleum Corporation Ltd. (HINDPETRO): ROC 23.0% (rank 185), EY 19.6% (rank 4) → overall #63
+- Chambal Fertilizers & Chemicals Ltd. (CHAMBLFERT): ROC 21.8% (rank 193), EY 14.2% (rank 9) → overall #70
+- NCC Ltd. (NCC): ROC 20.6% (rank 203), EY 16.6% (rank 6) → overall #73
+- Oil & Natural Gas Corporation Ltd. (ONGC): ROC 18.2% (rank 231), EY 17.5% (rank 5) → overall #87
 - Statement dates behind the top 20: {'2026-03-31': 18, '2025-12-31': 2}. EBIT fell back to Yahoo's EBIT line (includes other income) for 0 of them.
 
 ## How to check a number
@@ -109,17 +111,17 @@ Every number below is in INR crore, from Yahoo Finance annual statements dated 2
 
 **5. Enterprise value**
 ```
-  Market cap                             337,788
+  Market cap                             337,626
 + Total debt                               5,215
 + Minority interest                           32
 + Preferred equity                             0
 - Cash & short-term investments           30,615
-= Enterprise value                       312,420
+= Enterprise value                       312,258
 ```
 
-**6. Earnings yield** = 40,819 / 312,420 = **13.1%** → EY rank **13**
+**6. Earnings yield** = 40,819 / 312,258 = **13.1%** → EY rank **14**
 
-**7. Combined score** = 14 + 13 = **27** → overall rank **#1**
+**7. Combined score** = 14 + 14 = **28** → overall rank **#1**
 
 
 To audit any other company: find its row in `output/04_metrics.csv` (every intermediate column), then its source line items in `output/02_raw_financials.csv` (the `__src` columns name the Yahoo row each value came from).
