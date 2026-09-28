@@ -1,0 +1,41 @@
+name: Run Magic Formula screen
+
+on:
+  workflow_dispatch:
+    inputs:
+      top:
+        description: "How many companies to list"
+        default: "20"
+      min_mcap_cr:
+        description: "Minimum market cap (INR crore)"
+        default: "5000"
+  push:
+    paths: ["magic_formula/**", "run.py", "requirements.txt", ".github/workflows/screen.yml"]
+  schedule:
+    - cron: "30 3 1 * *"   # 09:00 IST on the 1st of each month
+
+permissions:
+  contents: write
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q
+      - run: python run.py --top "${{ inputs.top || 20 }}" --min-mcap-cr "${{ inputs.min_mcap_cr || 5000 }}"
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898733+github-actions[bot]@users.noreply.github.com"
+          git add output/
+          git diff --cached --quiet && exit 0
+          git commit -m "Update screen results $(date -u +%F)"
+          git pull --rebase
+          git push
