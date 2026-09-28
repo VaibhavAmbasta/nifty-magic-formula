@@ -76,7 +76,25 @@ def fetch_one(yf_ticker: str) -> dict:
         row[field], row[f"{field}__src"] = _pick(inc, names)
     for field, names in BALANCE_FIELDS.items():
         row[field], row[f"{field}__src"] = _pick(bal, names)
+
+    # Some companies (e.g. Infosys, HCLTech) report to Yahoo in USD while their
+    # market cap is in INR. Record the exchange rate at the balance-sheet date
+    # so compute.py can convert; the rate and its date are kept for audit.
+    fc = row.get("financialCurrency") or "INR"
+    row["fx_to_inr"], row["fx_date"] = (1.0, None) if fc == "INR" else _fx_to_inr(fc, row["balance_sheet_date"])
     return row
+
+
+def _fx_to_inr(currency: str, on: str | None) -> tuple[float | None, str | None]:
+    import yfinance as yf
+
+    if not on:
+        return None, None
+    end = pd.Timestamp(on) + pd.Timedelta(days=1)
+    hist = yf.Ticker(f"{currency}INR=X").history(start=end - pd.Timedelta(days=10), end=end)
+    if hist.empty:
+        return None, None
+    return float(hist["Close"].iloc[-1]), str(hist.index[-1].date())
 
 
 def fetch_all(tickers: list[str], pause: float = 0.4, retries: int = 2) -> pd.DataFrame:

@@ -11,7 +11,7 @@ def _pct(x: float) -> str:
 
 
 def _cr(x: float) -> str:
-    return f"{x:,.0f}"
+    return "0" if pd.isna(x) else f"{x:,.0f}"
 
 
 def _funnel(universe_n: int, excluded: pd.DataFrame, ranked_n: int) -> str:
@@ -29,7 +29,7 @@ def _funnel(universe_n: int, excluded: pd.DataFrame, ranked_n: int) -> str:
 def _worked_example(r: pd.Series) -> str:
     return f"""### Worked example: #{r.magic_formula_rank} {r.company} ({r.symbol})
 
-Every number below is in INR crore, from Yahoo Finance annual statements dated {r.balance_sheet_date}.
+Every number below is in INR crore, from Yahoo Finance annual statements dated {r.balance_sheet_date}{'' if r.fx_applied == 1 else f' (reported in {r.statement_currency}, converted at {r.fx_applied:.2f} INR)'}.
 
 **1. EBIT** ({r.ebit_source}) = **{_cr(r.ebit_cr)}**
 
@@ -116,7 +116,7 @@ Generated {date.today().isoformat()} · universe: {universe['universe_source'].i
 | Earnings yield (EY) | EBIT ÷ Enterprise value | Price: profit per rupee paid for the whole business |
 | Combined score | ROC rank + EY rank | Lowest = good business at a cheap price |
 
-Parameters: minimum market cap Rs {params['min_market_cap_cr']:,.0f} cr · statements no older than {params['max_statement_age_days']} days · financials and utilities excluded.
+Parameters: minimum market cap Rs {params['min_market_cap_cr']:,.0f} cr · statements no older than {params['max_statement_age_days']} days · financials and utilities excluded · holding companies excluded where book minority interest > {params.get('max_minority_ratio', 0.2):.0%} of market cap.
 
 ## Funnel: how {len(universe)} companies became {n}
 
@@ -148,6 +148,7 @@ To audit any other company: find its row in `output/04_metrics.csv` (every inter
 
 ## Caveats — read before acting on this
 
+1. **Consolidated finance arms distort some names.** Companies that consolidate a lending subsidiary (e.g. Ashok Leyland → Hinduja Leyland Finance) carry that lender's borrowings in total debt and its interest income in EBIT. Check these against standalone figures.
 1. **Yahoo Finance data is unaudited and sometimes wrong** for Indian companies (misclassified line items, missing current debt, consolidated vs standalone mix-ups). Check any name you intend to buy against its annual report.
 2. **Annual, not trailing-twelve-month, EBIT.** Greenblatt uses TTM. By September the March-year figures are six months old.
 3. **Cyclicals look best at the peak.** Metals, oil & gas, and commodity names show high EY exactly when earnings are at their top. A one-year EBIT snapshot cannot tell peak from normal earnings.

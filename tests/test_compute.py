@@ -51,8 +51,12 @@ def test_filters_first_reason_wins():
         company("BANK", industry="Financial Services"),
         company("TINY", marketCap=100),
         company("OLD", balance_sheet_date="2023-03-31"),
-        company("USD", financialCurrency="USD"),
+        company("USD"),
     ]
+    # genuinely USD-denominated statements (values ~88x smaller), no FX rate available
+    for k in compute.STATEMENT_FIELDS:
+        if rows[-1][k] is not None:
+            rows[-1][k] /= 88
     rows[-1]["financialCurrency"] = "USD"
     kept, excl = compute.apply_filters(pd.DataFrame(rows), 5000, 550, today=date(2026, 9, 28))
     assert kept["symbol"].tolist() == ["OK"]
@@ -60,7 +64,7 @@ def test_filters_first_reason_wins():
     assert reasons["BANK"].startswith("financial")
     assert reasons["TINY"].startswith("market cap below")
     assert reasons["OLD"].startswith("latest annual")
-    assert reasons["USD"] == "statements not in INR"
+    assert reasons["USD"] == "statements in foreign currency and no FX rate"
 
 
 def test_post_filters_and_ranking():
@@ -89,3 +93,34 @@ def test_report_renders_and_funnel_adds_up():
     md = report.build_report(df, pd.concat([ex1, ex2]), ranked, 20,
                              {"min_market_cap_cr": 5000, "max_statement_age_days": 550})
     assert "## Top 20" in md and "Worked example" in md
+
+
+def test_usd_statements_converted_to_inr():
+    # Same company as test_metrics_by_hand but reported in USD at 1 USD = 80 INR.
+    row = company("USDCO")
+    for k in compute.STATEMENT_FIELDS:
+        if row[k] is not None:
+            row[k] = row[k] / 80
+    row.update(financialCurrency="USD", fx_to_inr=80.0)
+    kept, excl = compute.apply_filters(pd.DataFrame([row]), 5000, 550, today=date(2026, 9, 28))
+    assert excl.empty
+    d = compute.compute_metrics(kept).iloc[0]
+    assert d.roc == pytest.approx(1000 / 2700)
+    assert d.earnings_yield == pytest.approx(1000 / 9500)
+
+
+def test_holding_company_with_large_minority_interest_excluded():
+    rows = [company("HOLDCO", minority_interest=3_000), company("NORMAL", minority_interest=500)]
+    valid, excl = compute.post_metric_filters(compute.compute_metrics(pd.DataFrame(rows)), 0.2)
+    assert valid.symbol.tolist() == ["NORMAL"]
+    assert excl.iloc[0].exclusion_reason.startswith("holding company")
+
+
+def test_mislabelled_currency_is_not_converted():
+    # Yahoo labels HCLTech "USD" but its figures are INR. P/S of 2 read as INR
+    # is plausible, so no conversion must be applied even with an FX rate.
+    row = company("HCLLIKE")
+    row.update(financialCurrency="USD", fx_to_inr=88.0)
+    d = compute.compute_metrics(pd.DataFrame([row])).iloc[0]
+    assert d.fx_applied == 1.0 and d.statement_currency == "INR"
+    assert d.earnings_yield == pytest.approx(1000 / 9500)

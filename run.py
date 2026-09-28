@@ -30,6 +30,8 @@ def main() -> None:
     p.add_argument("--top", type=int, default=20)
     p.add_argument("--min-mcap-cr", type=float, default=5000, help="minimum market cap, INR crore")
     p.add_argument("--max-age-days", type=int, default=550, help="max age of latest annual statements")
+    p.add_argument("--max-minority-ratio", type=float, default=0.2,
+                   help="exclude if book minority interest / market cap exceeds this")
     p.add_argument("--limit", type=int, default=None, help="only fetch first N tickers (debugging)")
     a = p.parse_args()
     OUT.mkdir(exist_ok=True)
@@ -54,20 +56,21 @@ def main() -> None:
     df = universe.merge(raw, on="yf_ticker", how="left")
 
     # Step 3 - pre-metric filters
-    params = {"min_market_cap_cr": a.min_mcap_cr, "max_statement_age_days": a.max_age_days}
+    params = {"min_market_cap_cr": a.min_mcap_cr, "max_statement_age_days": a.max_age_days,
+              "max_minority_ratio": a.max_minority_ratio}
     kept, excl1 = compute.apply_filters(df, a.min_mcap_cr, a.max_age_days)
     print(f"[3] filters: kept {len(kept)}, excluded {len(excl1)}")
 
     # Step 4 - metrics, then drop undefined ones
     metrics = compute.compute_metrics(kept)
-    valid, excl2 = compute.post_metric_filters(metrics)
+    valid, excl2 = compute.post_metric_filters(metrics, a.max_minority_ratio)
     excluded = pd.concat([excl1, excl2], ignore_index=True)
     excluded[["symbol", "company", "nse_industry", "exclusion_reason"]].to_csv(OUT / "03_exclusions.csv", index=False)
     print(f"[4] metrics: {len(valid)} valid, {len(excl2)} dropped")
 
     # Step 5 - rank
     ranked = compute.rank(valid)
-    cols = ["magic_formula_rank", "symbol", "company", "nse_industry", "balance_sheet_date", "ebit_source",
+    cols = ["magic_formula_rank", "symbol", "company", "nse_industry", "balance_sheet_date", "ebit_source", "financialCurrency", "statement_currency", "fx_applied",
             "marketCap_cr", "revenue_cr", "ebit_cr", "current_assets_cr", "cash_and_st_investments_cr",
             "current_liabilities_cr", "current_debt_cr", "nwc_raw_cr", "nwc_cr", "net_fixed_assets_cr",
             "capital_employed_cr", "total_debt_cr", "minority_interest_cr", "preferred_equity_cr",

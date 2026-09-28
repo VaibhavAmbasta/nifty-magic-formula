@@ -30,6 +30,31 @@ CRORE = 1e7  # 1 crore = 10,000,000 INR
 EXCLUDED_NSE_INDUSTRIES = {"Financial Services", "Power"}
 EXCLUDED_YF_SECTORS = {"Financial Services", "Utilities"}
 
+STATEMENT_FIELDS = [
+    "revenue", "operating_income", "ebit_reported", "net_income", "current_assets",
+    "current_liabilities", "cash_and_st_investments", "current_debt", "total_debt",
+    "net_ppe", "minority_interest", "preferred_equity",
+]
+
+
+PLAUSIBLE_PRICE_TO_SALES = (0.05, 50.0)
+
+
+def needs_fx(df: pd.DataFrame) -> pd.Series:
+    """True where statement figures are genuinely in a foreign currency.
+
+    Yahoo's `financialCurrency` label is unreliable for Indian stocks: in the
+    2026-09 run HCLTech was labelled USD but reported in INR, while Infosys was
+    labelled USD and really was in USD. So the label alone is not trusted. If
+    market cap / revenue is a plausible price-to-sales ratio when the
+    statements are read as INR, they are INR whatever the label says.
+    """
+    labelled_foreign = df["financialCurrency"].notna() & (df["financialCurrency"] != "INR")
+    ps_if_inr = df["marketCap"] / df["revenue"]
+    lo, hi = PLAUSIBLE_PRICE_TO_SALES
+    looks_inr = ps_if_inr.between(lo, hi)
+    return labelled_foreign & ~looks_inr
+
 
 def apply_filters(
     df: pd.DataFrame,
@@ -54,8 +79,8 @@ def apply_filters(
          "data fetch failed")
     mark(df["nse_industry"].isin(EXCLUDED_NSE_INDUSTRIES) | df["sector"].isin(EXCLUDED_YF_SECTORS),
          "financial / utility (excluded by method)")
-    mark(df["financialCurrency"].notna() & (df["financialCurrency"] != "INR"),
-         "statements not in INR")
+    fx = df["fx_to_inr"] if "fx_to_inr" in df else pd.Series(np.nan, index=df.index)
+    mark(needs_fx(df) & fx.isna(), "statements in foreign currency and no FX rate")
     mark(df["marketCap"].isna(), "missing market cap")
     mark(df["marketCap"] < min_market_cap_cr * CRORE,
          f"market cap below Rs {min_market_cap_cr:,.0f} cr")
@@ -78,6 +103,16 @@ def apply_filters(
 def compute_metrics(df: pd.DataFrame) -> pd.DataFrame:
     """Add every intermediate quantity as its own column (all in INR crore)."""
     d = df.copy()
+
+    # Convert statement figures to INR where Yahoo reports them in another
+    # currency (market cap is already INR). Rate is from the balance-sheet date.
+    fx = d["fx_to_inr"] if "fx_to_inr" in d else pd.Series(np.nan, index=d.index)
+    foreign = needs_fx(d)
+    d["fx_applied"] = np.where(foreign, fx, 1.0)
+    d["statement_currency"] = np.where(foreign, d["financialCurrency"], "INR")
+    for c in STATEMENT_FIELDS:
+        d[c] = d[c] * d["fx_applied"]
+
     z = lambda col: d[col].fillna(0.0)  # noqa: E731 - missing debt/cash/MI treated as 0
 
     # EBIT: prefer operating income (excludes other income); fall back to
@@ -117,13 +152,25 @@ def compute_metrics(df: pd.DataFrame) -> pd.DataFrame:
     return d
 
 
-def post_metric_filters(d: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Drop rows where the metrics are undefined or economically meaningless."""
+def post_metric_filters(d: pd.DataFrame, max_minority_ratio: float = 0.2) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Drop rows where the metrics are undefined or economically meaningless.
+
+    Holding companies that consolidate a listed subsidiary (BBTC -> Britannia,
+    Grasim -> UltraTech, Vedanta -> Hindustan Zinc) book the outside
+    shareholders' stake at *book* value. Its market value is usually several
+    times larger, so EV is understated and earnings yield is badly overstated.
+    When book minority interest exceeds `max_minority_ratio` of market cap,
+    the EV is not trustworthy and the company is excluded.
+    """
     d = d.copy()
     reason = pd.Series(None, index=d.index, dtype=object)
     reason[d["ebit"] <= 0] = "EBIT <= 0 (loss-making at operating level)"
     reason[reason.isna() & (d["enterprise_value"] <= 0)] = "enterprise value <= 0 (net cash > market cap)"
     reason[reason.isna() & (d["capital_employed"] <= 0)] = "capital employed <= 0"
+    mi_ratio = d["minority_interest"].fillna(0) / d["marketCap"]
+    reason[reason.isna() & (mi_ratio > max_minority_ratio)] = (
+        f"holding company: minority interest > {max_minority_ratio:.0%} of market cap (EV unreliable)"
+    )
     d["exclusion_reason"] = reason
     kept = d[reason.isna()].drop(columns="exclusion_reason").reset_index(drop=True)
     return kept, d[reason.notna()].reset_index(drop=True)
