@@ -124,3 +124,15 @@ def test_mislabelled_currency_is_not_converted():
     d = compute.compute_metrics(pd.DataFrame([row])).iloc[0]
     assert d.fx_applied == 1.0 and d.statement_currency == "INR"
     assert d.earnings_yield == pytest.approx(1000 / 9500)
+
+
+def test_missing_currency_label_with_usd_figures_is_excluded():
+    # info call failed: no label, no FX rate, but figures are USD-sized.
+    row = company("NOLABEL")
+    for k in compute.STATEMENT_FIELDS:
+        if row[k] is not None:
+            row[k] = row[k] / 88
+    row["financialCurrency"] = None
+    kept, excl = compute.apply_filters(pd.DataFrame([row]), 5000, 550, today=date(2026, 9, 28))
+    assert kept.empty
+    assert excl.iloc[0].exclusion_reason == "statements in foreign currency and no FX rate"

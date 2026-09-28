@@ -66,6 +66,17 @@ def fetch_one(yf_ticker: str) -> dict:
     info = t.info or {}
     for k in INFO_FIELDS:
         row[k] = info.get(k)
+    row["marketCap__src"] = "info" if row["marketCap"] else None
+    if not row["marketCap"]:
+        # `.info` intermittently comes back empty under rate limiting (the
+        # 2026-09-28 run lost TCS and Reliance this way). fast_info derives
+        # market cap from price x shares via a different endpoint.
+        try:
+            mc = t.fast_info["marketCap"]
+            if mc and mc > 0:
+                row["marketCap"], row["marketCap__src"] = float(mc), "fast_info"
+        except Exception:  # noqa: BLE001
+            pass
 
     inc = t.income_stmt
     bal = t.balance_sheet
@@ -112,4 +123,24 @@ def fetch_all(tickers: list[str], pause: float = 0.4, retries: int = 2) -> pd.Da
         if i % 25 == 0:
             print(f"[fetch] {i}/{len(tickers)}")
         time.sleep(pause)
+
+    # Second pass: anything that came back without market cap or statements is
+    # usually a transient Yahoo failure, not missing data. Retry slowly once.
+    def incomplete(r: dict) -> bool:
+        return bool(r.get("fetch_error")) or not r.get("marketCap") or not r.get("balance_sheet_date")
+
+    retry = [i for i, r in enumerate(rows) if incomplete(r)]
+    if retry:
+        print(f"[fetch] retrying {len(retry)} incomplete tickers")
+        time.sleep(30)
+        for i in retry:
+            try:
+                new = fetch_one(rows[i]["yf_ticker"])
+                new["fetch_error"] = None
+                if not incomplete(new) or incomplete(rows[i]) and new.get("marketCap"):
+                    rows[i] = new
+            except Exception:  # noqa: BLE001
+                pass
+            time.sleep(pause * 3)
+        print(f"[fetch] still incomplete after retry: {sum(incomplete(r) for r in rows)}")
     return pd.DataFrame(rows)

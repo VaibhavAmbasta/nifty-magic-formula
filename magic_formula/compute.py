@@ -49,7 +49,8 @@ def needs_fx(df: pd.DataFrame) -> pd.Series:
     market cap / revenue is a plausible price-to-sales ratio when the
     statements are read as INR, they are INR whatever the label says.
     """
-    labelled_foreign = df["financialCurrency"].notna() & (df["financialCurrency"] != "INR")
+    # A missing label (Yahoo's info call failed) is treated as suspect too.
+    labelled_foreign = df["financialCurrency"].isna() | (df["financialCurrency"] != "INR")
     ps_if_inr = df["marketCap"] / df["revenue"]
     lo, hi = PLAUSIBLE_PRICE_TO_SALES
     looks_inr = ps_if_inr.between(lo, hi)
